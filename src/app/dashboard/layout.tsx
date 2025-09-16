@@ -25,41 +25,47 @@ export default async function DashboardLayout({
     .single()
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <DashboardNav user={user} userProfile={userProfile} />
       <div className="flex">
-        <aside className="w-64 bg-white shadow-sm">
+        <aside className="w-64 bg-background border-r border-border">
           <nav className="mt-8">
-            <div className="px-4 space-y-2">
+            <div className="px-4 space-y-1">
               <a
                 href="/dashboard"
-                className="flex items-center px-2 py-2 text-base font-medium text-gray-900 rounded-md hover:bg-gray-100"
+                className="flex items-center px-3 py-2 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Dashboard
               </a>
               <a
                 href="/dashboard/candidates"
-                className="flex items-center px-2 py-2 text-base font-medium text-gray-600 rounded-md hover:bg-gray-100"
+                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Candidates
               </a>
               <a
                 href="/dashboard/courses"
-                className="flex items-center px-2 py-2 text-base font-medium text-gray-600 rounded-md hover:bg-gray-100"
+                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Courses
               </a>
               <a
                 href="/dashboard/exams"
-                className="flex items-center px-2 py-2 text-base font-medium text-gray-600 rounded-md hover:bg-gray-100"
+                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Exams
               </a>
               <a
                 href="/dashboard/reports"
-                className="flex items-center px-2 py-2 text-base font-medium text-gray-600 rounded-md hover:bg-gray-100"
+                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Reports
+              </a>
+              <a
+                href="/dashboard/components"
+                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Components
               </a>
             </div>
           </nav>
