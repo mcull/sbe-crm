@@ -56,6 +56,12 @@ export default async function DashboardLayout({
                 Orders
               </a>
               <a
+                href="/dashboard/products"
+                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Products
+              </a>
+              <a
                 href="/dashboard/course-templates"
                 className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
