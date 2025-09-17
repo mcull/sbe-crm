@@ -140,6 +140,12 @@ export async function getSession(id: string) {
         base_price,
         metadata
       ),
+      linked_course:offerings!linked_course_offering_id (
+        id,
+        name,
+        type,
+        wset_level
+      ),
       products (
         id,
         name,
@@ -173,6 +179,7 @@ export async function getSession(id: string) {
 
 export async function createSession(data: {
   offering_id: string
+  linked_course_offering_id?: string
   name?: string
   session_date: string
   end_date?: string
