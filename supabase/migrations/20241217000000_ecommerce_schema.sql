@@ -368,7 +368,7 @@ CREATE POLICY "Conversion events are manageable by authenticated users" ON conve
 
 -- Create functions for automated order processing
 CREATE OR REPLACE FUNCTION generate_order_number()
-RETURNS TEXT AS $$
+RETURNS TRIGGER AS $$
 DECLARE
   year_part TEXT;
   sequence_num INTEGER;
@@ -388,7 +388,10 @@ BEGIN
   -- Format: SBE-2024-001
   order_num := 'SBE-' || year_part || '-' || LPAD(sequence_num::TEXT, 3, '0');
 
-  RETURN order_num;
+  -- Set the order number on the NEW record
+  NEW.order_number := order_num;
+
+  RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
