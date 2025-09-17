@@ -148,7 +148,7 @@ export default async function WSETWorkflowPage() {
                 <div className="flex space-x-2">
                   {Object.entries(statusCounts).map(([status, count]) => (
                     <Badge key={status} variant="outline">
-                      {status}: {count}
+                      {status}: {String(count)}
                     </Badge>
                   ))}
                 </div>
