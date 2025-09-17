@@ -197,7 +197,7 @@ export default function CourseForm({ course }: CourseFormProps) {
         </Button>
         <Button type="submit" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {course ? 'Update' : 'Create'} Course Template
+          {course ? 'Update' : 'Create'} Course
         </Button>
       </div>
     </form>

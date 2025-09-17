@@ -20,7 +20,7 @@ export default async function CoursesPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Courses & Sessions</h1>
           <p className="text-muted-foreground">
-            Manage WSET course templates and scheduled sessions
+            Manage WSET courses and scheduled sessions
           </p>
         </div>
       </div>
@@ -29,7 +29,7 @@ export default async function CoursesPage() {
         <TabsList>
           <TabsTrigger value="courses" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
-            Course Templates ({courses.length})
+            Courses ({courses.length})
           </TabsTrigger>
           <TabsTrigger value="sessions" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
@@ -39,11 +39,11 @@ export default async function CoursesPage() {
 
         <TabsContent value="courses" className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">WSET Course Templates</h2>
+            <h2 className="text-xl font-semibold">WSET Courses</h2>
             <Button asChild>
               <Link href="/dashboard/courses/new">
                 <Plus className="mr-2 h-4 w-4" />
-                Add Course Template
+                Add Course
               </Link>
             </Button>
           </div>
