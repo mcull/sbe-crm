@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Database } from '@/lib/database.types'
 import { createCourse, updateCourse } from '@/lib/actions/courses'
+import { getCourseTemplate } from '@/lib/actions/course-templates'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -13,42 +14,17 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { AlertCircle, Loader2 } from 'lucide-react'
 
 type Course = Database['public']['Tables']['courses']['Row']
+type CourseTemplate = Database['public']['Tables']['course_templates']['Row']
 
 interface CourseFormProps {
   course?: Course
-}
-
-const WSET_COURSE_TEMPLATES = {
-  1: {
-    name: 'WSET Level 1 Award in Wines',
-    description: 'An introductory course for wine novices, covering the basic principles of wine and wine tasting.',
-    duration_weeks: 1,
-    max_capacity: 16,
-  },
-  2: {
-    name: 'WSET Level 2 Award in Wines',
-    description: 'For those with some knowledge who want to understand wine in greater depth.',
-    duration_weeks: 2,
-    max_capacity: 20,
-  },
-  3: {
-    name: 'WSET Level 3 Award in Wines',
-    description: 'A comprehensive study of wines suitable for wine professionals and serious enthusiasts.',
-    duration_weeks: 6,
-    max_capacity: 18,
-  },
-  4: {
-    name: 'WSET Level 4 Diploma in Wines',
-    description: 'The most advanced qualification for wine professionals, covering viticulture, winemaking, and business.',
-    duration_weeks: 52,
-    max_capacity: 12,
-  },
 }
 
 export default function CourseForm({ course }: CourseFormProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [selectedLevel, setSelectedLevel] = useState<string>(course?.wset_level?.toString() || '')
+  const [templates, setTemplates] = useState<Record<string, CourseTemplate>>({})
   const router = useRouter()
 
   const handleSubmit = async (formData: FormData) => {
@@ -67,23 +43,48 @@ export default function CourseForm({ course }: CourseFormProps) {
     }
   }
 
+  // Load templates from database on component mount
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        const templateData: Record<string, CourseTemplate> = {}
+        // Load templates for all WSET levels
+        for (let i = 1; i <= 4; i++) {
+          try {
+            const template = await getCourseTemplate(i)
+            templateData[i.toString()] = template
+          } catch {
+            // Template might not exist, skip
+          }
+        }
+        setTemplates(templateData)
+      } catch (err) {
+        console.error('Failed to load course templates:', err)
+      }
+    }
+
+    loadTemplates()
+  }, [])
+
   const handleLevelChange = (level: string) => {
     setSelectedLevel(level)
 
     // Auto-populate form fields when a level is selected
     if (level && !course) {
-      const template = WSET_COURSE_TEMPLATES[level as keyof typeof WSET_COURSE_TEMPLATES]
+      const template = templates[level]
       if (template) {
         // Update form fields
         const nameInput = document.getElementById('name') as HTMLInputElement
         const descInput = document.getElementById('description') as HTMLTextAreaElement
         const durationInput = document.getElementById('duration_weeks') as HTMLInputElement
         const capacityInput = document.getElementById('max_capacity') as HTMLInputElement
+        const priceInput = document.getElementById('price') as HTMLInputElement
 
         if (nameInput) nameInput.value = template.name
-        if (descInput) descInput.value = template.description
+        if (descInput) descInput.value = template.description || ''
         if (durationInput) durationInput.value = template.duration_weeks.toString()
         if (capacityInput) capacityInput.value = template.max_capacity.toString()
+        if (priceInput && template.price) priceInput.value = template.price.toString()
       }
     }
   }

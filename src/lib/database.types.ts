@@ -34,6 +34,42 @@ export type Database = {
         }
         Relationships: []
       }
+      course_templates: {
+        Row: {
+          id: string
+          wset_level: number
+          name: string
+          description: string | null
+          duration_weeks: number
+          max_capacity: number
+          price: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          wset_level: number
+          name: string
+          description?: string | null
+          duration_weeks?: number
+          max_capacity?: number
+          price?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          wset_level?: number
+          name?: string
+          description?: string | null
+          duration_weeks?: number
+          max_capacity?: number
+          price?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           id: string
