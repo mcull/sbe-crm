@@ -44,10 +44,10 @@ export default async function DashboardLayout({
                 Candidates
               </a>
               <a
-                href="/dashboard/courses"
+                href="/dashboard/offerings"
                 className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
-                Courses
+                Courses & Sessions
               </a>
               <a
                 href="/dashboard/orders"
@@ -65,7 +65,7 @@ export default async function DashboardLayout({
                 href="/dashboard/course-templates"
                 className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
-                Course Templates
+                Templates (Legacy)
               </a>
               <a
                 href="/dashboard/exams"
