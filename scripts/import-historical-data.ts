@@ -370,6 +370,60 @@ async function importHistoricalOrders(orders: SquarespaceOrder[]) {
   }
 }
 
+async function linkOrderItemsToProducts() {
+  console.log('🔗 Linking order items to products...')
+
+  // Get all products and order items
+  const { data: products } = await supabase
+    .from('products')
+    .select('id, name, metadata')
+
+  const { data: orderItems } = await supabase
+    .from('order_items')
+    .select('id, name, sku')
+    .is('product_id', null)
+
+  if (!products || !orderItems) {
+    console.log('⚠️ No products or order items to link')
+    return
+  }
+
+  console.log(`Found ${orderItems.length} order items to link to ${products.length} products`)
+
+  let linkedCount = 0
+
+  // Try to match order items to products by name similarity
+  for (const orderItem of orderItems) {
+    const matchingProduct = products.find(product => {
+      // Exact name match
+      if (product.name === orderItem.name) return true
+
+      // Partial name match (product name contained in order item name)
+      if (orderItem.name?.toLowerCase().includes(product.name.toLowerCase())) return true
+
+      // SKU match if available
+      if (orderItem.sku && product.metadata?.original_sku === orderItem.sku) return true
+
+      return false
+    })
+
+    if (matchingProduct) {
+      const { error } = await supabase
+        .from('order_items')
+        .update({ product_id: matchingProduct.id })
+        .eq('id', orderItem.id)
+
+      if (!error) {
+        linkedCount++
+      } else {
+        console.error(`Error linking order item ${orderItem.id}:`, error)
+      }
+    }
+  }
+
+  console.log(`✅ Linked ${linkedCount} order items to products`)
+}
+
 async function updateCustomerStatistics() {
   console.log('📊 Updating customer statistics...')
   // Statistics will be updated by database triggers when orders are processed
@@ -409,6 +463,7 @@ async function main() {
     await importHistoricalProducts(products)
     await importHistoricalCustomers(orders)
     await importHistoricalOrders(orders)
+    await linkOrderItemsToProducts()
     await updateCustomerStatistics()
 
     console.log('🎉 Historical data import completed successfully!')
