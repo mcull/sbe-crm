@@ -7,7 +7,7 @@
  */
 
 import { createClient } from '@supabase/supabase-js'
-import { syncProductToStripe, createStripePrice } from '@/lib/stripe/products'
+import { stripe } from '@/lib/stripe/server'
 
 // Supabase configuration
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
@@ -54,8 +54,34 @@ async function main() {
         console.log(`\n📦 Processing: ${product.name}`)
 
         // Sync product to Stripe
-        const stripeProductId = await syncProductToStripe(product)
-        console.log(`✅ Product synced: ${stripeProductId}`)
+        const stripeProductData = {
+          name: product.name,
+          description: product.description || undefined,
+          metadata: {
+            product_id: product.id,
+            type: product.type,
+            ...(product.metadata as object || {})
+          },
+          active: product.active
+        }
+
+        let stripeProduct
+
+        if (product.stripe_product_id) {
+          // Update existing Stripe product
+          stripeProduct = await stripe.products.update(product.stripe_product_id, stripeProductData)
+        } else {
+          // Create new Stripe product
+          stripeProduct = await stripe.products.create(stripeProductData)
+
+          // Update our database with the Stripe product ID
+          await supabase
+            .from('products')
+            .update({ stripe_product_id: stripeProduct.id })
+            .eq('id', product.id)
+        }
+
+        console.log(`✅ Product synced: ${stripeProduct.id}`)
         syncedProducts++
 
         // Create price if we don't have one and we have pricing info
@@ -128,15 +154,22 @@ async function main() {
 
           if (priceAmount > 0) {
             try {
-              await createStripePrice(
-                product.id,
-                stripeProductId,
-                {
-                  amount: priceAmount,
-                  currency: 'usd',
-                  nickname: `Default price for ${product.name}`
+              const price = await stripe.prices.create({
+                product: stripeProduct.id,
+                unit_amount: priceAmount,
+                currency: 'usd',
+                nickname: `Default price for ${product.name}`,
+                metadata: {
+                  product_id: product.id
                 }
-              )
+              })
+
+              // Update our database with the default price ID
+              await supabase
+                .from('products')
+                .update({ stripe_price_id: price.id })
+                .eq('id', product.id)
+
               console.log(`✅ Price created: $${(priceAmount / 100).toFixed(2)}`)
               createdPrices++
             } catch (priceError) {
