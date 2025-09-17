@@ -56,6 +56,12 @@ export default async function DashboardLayout({
                 Exams
               </a>
               <a
+                href="/dashboard/wset-workflow"
+                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                WSET Workflow
+              </a>
+              <a
                 href="/dashboard/reports"
                 className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
