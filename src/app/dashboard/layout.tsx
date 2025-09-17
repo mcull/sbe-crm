@@ -37,12 +37,13 @@ export default async function DashboardLayout({
               >
                 Dashboard
               </a>
-              <a
-                href="/dashboard/candidates"
-                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                Candidates
-              </a>
+
+              {/* Core Business Operations */}
+              <div className="pt-4 pb-2">
+                <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  Business Operations
+                </h3>
+              </div>
               <a
                 href="/dashboard/offerings"
                 className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -56,22 +57,23 @@ export default async function DashboardLayout({
                 Orders
               </a>
               <a
+                href="/dashboard/candidates"
+                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              >
+                Customers
+              </a>
+
+              {/* System Management */}
+              <div className="pt-4 pb-2">
+                <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  System Management
+                </h3>
+              </div>
+              <a
                 href="/dashboard/products"
                 className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Products
-              </a>
-              <a
-                href="/dashboard/course-templates"
-                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                Templates (Legacy)
-              </a>
-              <a
-                href="/dashboard/exams"
-                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                Exams
               </a>
               <a
                 href="/dashboard/wset-workflow"
@@ -84,12 +86,6 @@ export default async function DashboardLayout({
                 className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
               >
                 Reports
-              </a>
-              <a
-                href="/dashboard/components"
-                className="flex items-center px-3 py-2 text-sm font-medium text-muted-foreground rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                Components
               </a>
             </div>
           </nav>
