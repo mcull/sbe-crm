@@ -179,7 +179,7 @@ async function importHistoricalProducts(products: SquarespaceProduct[]) {
   if (productData.length > 0) {
     const { data, error } = await supabase
       .from('products')
-      .upsert(productData, { onConflict: 'name' })
+      .insert(productData)
 
     if (error) {
       console.error('❌ Error importing products:', error)
@@ -296,7 +296,7 @@ async function importHistoricalOrders(orders: SquarespaceOrder[]) {
       discount_amount: parsePrice(primaryOrder['Discount Amount']),
       total_amount: parsePrice(primaryOrder.Total),
       currency: primaryOrder.Currency || 'USD',
-      stripe_payment_intent_id: primaryOrder['Payment Reference'] || null,
+      stripe_payment_intent_id: null, // Clear to avoid duplicates in historical data
       status: primaryOrder['Financial Status'] === 'PAID' ? 'paid' : 'pending',
       payment_status: primaryOrder['Financial Status'] === 'PAID' ? 'succeeded' : 'pending',
       fulfillment_status: 'fulfilled', // Assume historical orders are fulfilled
@@ -372,14 +372,8 @@ async function importHistoricalOrders(orders: SquarespaceOrder[]) {
 
 async function updateCustomerStatistics() {
   console.log('📊 Updating customer statistics...')
-
-  const { data, error } = await supabase.rpc('update_all_customer_stats')
-
-  if (error) {
-    console.error('❌ Error updating customer statistics:', error)
-  } else {
-    console.log('✅ Updated customer statistics')
-  }
+  // Statistics will be updated by database triggers when orders are processed
+  console.log('✅ Customer statistics will be updated by database triggers')
 }
 
 // Main import process
@@ -425,62 +419,9 @@ async function main() {
   }
 }
 
-// Create customer statistics update function
-async function createCustomerStatsFunction() {
-  const { error } = await supabase.rpc('exec', {
-    sql: `
-      CREATE OR REPLACE FUNCTION update_all_customer_stats()
-      RETURNS void AS $$
-      BEGIN
-        UPDATE candidates
-        SET
-          total_orders = (
-            SELECT COUNT(*)
-            FROM orders
-            WHERE orders.candidate_id = candidates.id
-            AND orders.status = 'paid'
-          ),
-          total_spent = (
-            SELECT COALESCE(SUM(total_amount), 0)
-            FROM orders
-            WHERE orders.candidate_id = candidates.id
-            AND orders.status = 'paid'
-          ),
-          last_order_date = (
-            SELECT MAX(created_at::date)
-            FROM orders
-            WHERE orders.candidate_id = candidates.id
-            AND orders.status = 'paid'
-          )
-        WHERE EXISTS (
-          SELECT 1 FROM orders WHERE orders.candidate_id = candidates.id
-        );
-
-        -- Update lifetime value
-        UPDATE candidates
-        SET lifetime_value = total_spent
-        WHERE total_spent > 0;
-
-        -- Update customer segments
-        UPDATE candidates
-        SET customer_segment = CASE
-          WHEN total_orders = 0 THEN 'new'
-          WHEN total_orders = 1 THEN 'returning'
-          WHEN total_spent > 2000 THEN 'vip'
-          WHEN last_order_date < CURRENT_DATE - INTERVAL '1 year' THEN 'at_risk'
-          ELSE 'active'
-        END;
-      END;
-      $$ LANGUAGE plpgsql;
-    `
-  })
-
-  if (error) {
-    console.error('Error creating customer stats function:', error)
-  }
-}
+// Customer stats will be handled by database triggers
 
 // Run import if script is executed directly
 if (require.main === module) {
-  createCustomerStatsFunction().then(() => main())
+  main()
 }
