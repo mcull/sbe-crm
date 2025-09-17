@@ -140,12 +140,6 @@ export async function getSession(id: string) {
         base_price,
         metadata
       ),
-      linked_course:offerings!linked_course_offering_id (
-        id,
-        name,
-        type,
-        wset_level
-      ),
       products (
         id,
         name,
@@ -179,7 +173,6 @@ export async function getSession(id: string) {
 
 export async function createSession(data: {
   offering_id: string
-  linked_course_offering_id?: string
   name?: string
   session_date: string
   end_date?: string
@@ -382,4 +375,143 @@ export async function getOfferingsStats() {
   }
 
   return stats
+}
+
+// Course-Exam Relationship Management
+export async function getCourseExamRelationships(courseOfferingId?: string, examOfferingId?: string) {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('course_exam_relationships')
+    .select(`
+      *,
+      course_offering:offerings!course_offering_id (
+        id,
+        name,
+        type,
+        wset_level
+      ),
+      exam_offering:offerings!exam_offering_id (
+        id,
+        name,
+        type,
+        wset_level
+      )
+    `)
+
+  if (courseOfferingId) {
+    query = query.eq('course_offering_id', courseOfferingId)
+  }
+  if (examOfferingId) {
+    query = query.eq('exam_offering_id', examOfferingId)
+  }
+
+  const { data: relationships, error } = await query
+
+  if (error) {
+    throw new Error(`Failed to fetch course-exam relationships: ${error.message}`)
+  }
+
+  return relationships || []
+}
+
+// Get available exam sessions for a course student
+export async function getAvailableExamSessions(courseOfferingId: string) {
+  const supabase = await createClient()
+
+  // Get exam offerings related to this course
+  const { data: relationships } = await supabase
+    .from('course_exam_relationships')
+    .select('exam_offering_id')
+    .eq('course_offering_id', courseOfferingId)
+
+  if (!relationships || relationships.length === 0) {
+    return []
+  }
+
+  const examOfferingIds = relationships.map(r => r.exam_offering_id)
+
+  // Get upcoming sessions for these exam offerings
+  const { data: sessions, error } = await supabase
+    .from('sessions')
+    .select(`
+      *,
+      offerings (
+        id,
+        name,
+        type,
+        wset_level
+      )
+    `)
+    .in('offering_id', examOfferingIds)
+    .gte('session_date', new Date().toISOString())
+    .eq('booking_enabled', true)
+    .order('session_date', { ascending: true })
+
+  if (error) {
+    throw new Error(`Failed to fetch available exam sessions: ${error.message}`)
+  }
+
+  return sessions || []
+}
+
+// Course Enrollment Management
+export async function createCourseEnrollment(data: {
+  candidate_id: string
+  course_offering_id: string
+  course_start_date?: string
+  access_duration_days?: number
+  exam_eligibility_days?: number
+}) {
+  const supabase = await createClient()
+
+  const startDate = data.course_start_date ? new Date(data.course_start_date) : new Date()
+  const accessDays = data.access_duration_days || 365
+  const examDays = data.exam_eligibility_days || 365
+
+  const accessExpiresAt = new Date(startDate)
+  accessExpiresAt.setDate(accessExpiresAt.getDate() + accessDays)
+
+  const examExpiresAt = new Date(startDate)
+  examExpiresAt.setDate(examExpiresAt.getDate() + examDays)
+
+  const { data: enrollment, error } = await supabase
+    .from('course_enrollments')
+    .insert({
+      candidate_id: data.candidate_id,
+      course_offering_id: data.course_offering_id,
+      course_start_date: startDate.toISOString(),
+      access_expires_at: accessExpiresAt.toISOString(),
+      exam_eligibility_expires_at: examExpiresAt.toISOString(),
+      status: 'active'
+    })
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(`Failed to create course enrollment: ${error.message}`)
+  }
+
+  return enrollment
+}
+
+// Register student for exam session
+export async function createExamRegistration(data: {
+  candidate_id: string
+  session_id: string
+  course_enrollment_id?: string
+}) {
+  const supabase = await createClient()
+
+  const { data: registration, error } = await supabase
+    .from('exam_registrations')
+    .insert(data)
+    .select()
+    .single()
+
+  if (error) {
+    throw new Error(`Failed to create exam registration: ${error.message}`)
+  }
+
+  return registration
 }

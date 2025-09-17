@@ -42,7 +42,6 @@ export default function NewExamPage() {
 
   const [formData, setFormData] = useState({
     offering_id: '',
-    linked_course_offering_id: '',
     name: '',
     session_date: '',
     location: 'Online',
@@ -85,13 +84,10 @@ export default function NewExamPage() {
     }
   }
 
-  const handleCourseOfferingSelect = (offeringId: string) => {
-    const offering = courseOfferings.find(o => o.id === offeringId)
-    setSelectedCourseOffering(offering)
-    setFormData(prev => ({
-      ...prev,
-      linked_course_offering_id: offeringId
-    }))
+  // Get related courses for selected exam offering
+  const getRelatedCourses = (examOffering: Offering | null) => {
+    if (!examOffering) return []
+    return courseOfferings.filter(course => course.wset_level === examOffering.wset_level)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,9 +102,9 @@ export default function NewExamPage() {
         early_bird_discount_percent: parseInt(formData.early_bird_discount_percent)
       }
 
-      // Remove empty fields except linked_course_offering_id which we want to keep
+      // Remove empty fields
       Object.keys(examData).forEach(key => {
-        if (examData[key as keyof typeof examData] === '' && key !== 'linked_course_offering_id') {
+        if (examData[key as keyof typeof examData] === '') {
           delete examData[key as keyof typeof examData]
         }
       })
@@ -211,55 +207,39 @@ export default function NewExamPage() {
             </CardContent>
           </Card>
 
-          {/* Step 2: Link to Course (Optional) */}
-          {selectedExamOffering && (
+          {/* Step 2: Available for Course Students */}
+          {selectedExamOffering && getRelatedCourses(selectedExamOffering).length > 0 && (
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <BookOpen className="h-5 w-5" />
-                  Step 2: Link to Course (Optional)
+                  Step 2: Available Course Students
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
-                  <Label htmlFor="course-offering">Related Course (Optional)</Label>
-                  <Select onValueChange={handleCourseOfferingSelect}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose course this exam is for (leave blank if standalone)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {courseOfferings
-                        .filter(course => course.wset_level === selectedExamOffering.wset_level)
-                        .map((offering) => (
-                          <SelectItem key={offering.id} value={offering.id}>
-                            <div className="flex items-center gap-2">
-                              <span>WSET Level {offering.wset_level} - {offering.name}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Link this exam to a specific course offering. This helps track which students need retakes or are transferring from other providers.
-                  </p>
-                </div>
-
-                {selectedCourseOffering && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <div className="flex items-center gap-2 text-blue-800 mb-2">
-                      <BookOpen className="h-4 w-4" />
-                      <span className="font-medium text-sm">Course Connection</span>
-                    </div>
-                    <p className="text-sm text-blue-700">
-                      This exam will be linked to <strong>{selectedCourseOffering.name}</strong>
-                    </p>
-                    <ul className="text-sm text-blue-700 mt-1 space-y-1">
-                      <li>• Students from this course can easily register for retakes</li>
-                      <li>• Exam results will be associated with the course</li>
-                      <li>• Reporting will show course completion rates</li>
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2 text-blue-800 mb-3">
+                    <BookOpen className="h-4 w-4" />
+                    <span className="font-medium">This exam is available for students from:</span>
+                  </div>
+                  <div className="space-y-2">
+                    {getRelatedCourses(selectedExamOffering).map((course) => (
+                      <div key={course.id} className="flex items-center gap-2 text-blue-700">
+                        <Badge variant="outline" className="text-xs">WSET Level {course.wset_level}</Badge>
+                        <span className="font-medium">{course.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <h4 className="font-medium text-blue-800 text-sm mb-2">Online Course Student Benefits:</h4>
+                    <ul className="text-sm text-blue-700 space-y-1">
+                      <li>• Students can choose any exam date within their enrollment period</li>
+                      <li>• Flexible scheduling up to 1 year after course start</li>
+                      <li>• Results automatically linked to course completion</li>
+                      <li>• Also available for retakes and external students</li>
                     </ul>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
           )}
@@ -367,8 +347,7 @@ export default function NewExamPage() {
                        ` - ${new Date(formData.session_date).toLocaleDateString('en-US', {
                          month: 'short', day: 'numeric', year: 'numeric'
                        })}` : ''
-                     }${selectedCourseOffering ? ` (${selectedCourseOffering.name})` : ''}`
-                    }
+                     }`}
                   </p>
                 </div>
 
@@ -379,14 +358,14 @@ export default function NewExamPage() {
                   </div>
                 </div>
 
-                {selectedCourseOffering && (
+                {getRelatedCourses(selectedExamOffering).length > 0 && (
                   <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
                     <div className="flex items-center gap-2 text-blue-800 mb-2">
                       <BookOpen className="h-4 w-4" />
-                      <span className="font-medium text-sm">Course Integration</span>
+                      <span className="font-medium text-sm">Available for Course Students</span>
                     </div>
                     <p className="text-sm text-blue-700">
-                      Linked to: <strong>{selectedCourseOffering.name}</strong>
+                      Students from {getRelatedCourses(selectedExamOffering).length} related course{getRelatedCourses(selectedExamOffering).length !== 1 ? 's' : ''} can register
                     </p>
                   </div>
                 )}
@@ -400,7 +379,7 @@ export default function NewExamPage() {
                     <li>✓ Exam product created automatically</li>
                     <li>✓ Online proctoring metadata included</li>
                     <li>✓ Registration capacity tracking</li>
-                    <li>✓ {selectedCourseOffering ? 'Course linkage established' : 'Standalone exam setup'}</li>
+                    <li>✓ Available for course students and standalone registration</li>
                     <li>✓ Student results tracking enabled</li>
                   </ul>
                 </div>

@@ -183,21 +183,6 @@ async function SessionDetailContent({ sessionId }: { sessionId: string }) {
                 </div>
               )}
 
-              {session.linked_course && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Related Course</label>
-                  <div className="flex items-center gap-2">
-                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{session.linked_course.name}</span>
-                    <Badge variant="outline" className="text-xs">
-                      WSET Level {session.linked_course.wset_level}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    This exam is linked to a specific course for retakes and transfers
-                  </p>
-                </div>
-              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
