@@ -42,3 +42,6 @@ next-env.d.ts
 
 # artifacts and documents
 /public/artifacts
+
+# historical data from squarespace (sensitive customer data)
+/public/historical
