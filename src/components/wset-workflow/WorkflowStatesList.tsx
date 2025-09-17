@@ -25,9 +25,33 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+interface WorkflowState {
+  id: string
+  status: string
+  created_at: string
+  requires_review: boolean
+  wset_candidates?: {
+    order_number: string
+    course_type: string
+    course_level: number
+    exam_type: string
+    candidates?: {
+      first_name: string
+      last_name: string
+    }
+  }
+}
+
+interface DeadlineValidation {
+  workflowStateId: string
+  examDate: string
+  workingDaysRemaining: number
+  errors: string[]
+}
+
 interface WorkflowStatesListProps {
-  workflowStates: any[]
-  deadlineValidations: any[]
+  workflowStates: WorkflowState[]
+  deadlineValidations: DeadlineValidation[]
 }
 
 const statusColors = {

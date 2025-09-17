@@ -11,8 +11,23 @@ import {
   Calendar
 } from 'lucide-react'
 
+interface DeadlineValidation {
+  workflowStateId: string
+  candidateName: string
+  orderNumber: string
+  courseType: string
+  examDate: string
+  examType: 'PDF' | 'RI'
+  level: 1 | 2 | 3 | 4
+  workingDaysRemaining: number
+  submissionDeadline: string
+  errors: string[]
+  warnings: string[]
+  canSubmitLate: boolean
+}
+
 interface WSETDeadlineTrackerProps {
-  validations: any[]
+  validations: DeadlineValidation[]
 }
 
 export default function WSETDeadlineTracker({ validations }: WSETDeadlineTrackerProps) {
@@ -33,21 +48,21 @@ export default function WSETDeadlineTracker({ validations }: WSETDeadlineTracker
   )
   const compliant = validations.filter(v => v.workingDaysRemaining > 5)
 
-  const getUrgencyColor = (validation: any) => {
+  const getUrgencyColor = (validation: DeadlineValidation) => {
     if (validation.errors.length > 0) return 'text-red-600'
     if (validation.workingDaysRemaining <= 2) return 'text-orange-600'
     if (validation.workingDaysRemaining <= 5) return 'text-yellow-600'
     return 'text-green-600'
   }
 
-  const getUrgencyIcon = (validation: any) => {
+  const getUrgencyIcon = (validation: DeadlineValidation) => {
     if (validation.errors.length > 0) return XCircle
     if (validation.workingDaysRemaining <= 2) return AlertTriangle
     if (validation.workingDaysRemaining <= 5) return Clock
     return CheckCircle
   }
 
-  const calculateProgress = (validation: any) => {
+  const calculateProgress = (validation: DeadlineValidation) => {
     // Assume 10 working days is the standard (adjust based on exam type)
     const totalDays = validation.examType === 'RI' ? 7 : 10
     const remaining = Math.max(0, validation.workingDaysRemaining)

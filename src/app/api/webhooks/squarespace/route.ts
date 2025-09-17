@@ -2,12 +2,12 @@
 // Processes incoming course orders and triggers WSET workflow automation
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+// import { createClient } from '@/lib/supabase/server'
 import { processSquarespaceOrder } from '@/lib/wset-workflow/order-processor'
 import { logWorkflowAction } from '@/lib/wset-workflow/workflow-logger'
 
 // Webhook security - verify requests are from Squarespace
-function verifySquarespaceWebhook(request: NextRequest, body: string): boolean {
+function verifySquarespaceWebhook(request: NextRequest, _body: string): boolean {
   // TODO: Implement Squarespace webhook signature verification
   // This should verify the X-Squarespace-Signature header
   const signature = request.headers.get('x-squarespace-signature')
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if this is a WSET course order
-    const isWSETOrder = orderData.lineItems?.some((item: any) =>
+    const isWSETOrder = orderData.lineItems?.some((item: { productName?: string }) =>
       item.productName?.toLowerCase().includes('wset') ||
       item.productName?.toLowerCase().includes('wine') ||
       item.productName?.toLowerCase().includes('level')
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
 }
 
 // Handle GET requests for webhook verification
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   // Some webhook services send GET requests to verify endpoints
   return NextResponse.json({
     message: 'SBE CRM Squarespace Webhook Endpoint',
