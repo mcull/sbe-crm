@@ -55,6 +55,9 @@ export async function createOffering(data: {
   base_price: number
   default_duration_hours?: number
   default_capacity?: number
+  active?: boolean
+  auto_create_products?: boolean
+  stripe_sync_enabled?: boolean
   metadata?: any
 }) {
   const supabase = await createClient()
