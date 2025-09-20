@@ -177,6 +177,7 @@ export function ImageUpload({
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
                 <Button
+                  type="button"
                   variant="destructive"
                   size="sm"
                   className="absolute top-2 right-2"
@@ -250,6 +251,7 @@ export function ImageUpload({
       {preview && !uploading && (
         <div className="flex gap-2">
           <Button
+            type="button"
             variant="outline"
             size="sm"
             onClick={() => {
