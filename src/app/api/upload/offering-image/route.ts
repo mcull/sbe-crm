@@ -4,6 +4,14 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Blob token is configured
+    if (!process.env.SEBEVED_BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json(
+        { error: 'Blob storage not configured' },
+        { status: 500 }
+      )
+    }
+
     // Check if user is authenticated (you may want to add more specific auth checks)
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -55,6 +63,7 @@ export async function POST(request: NextRequest) {
     const blob = await put(uniqueFilename, body, {
       access: 'public',
       contentType,
+      token: process.env.SEBEVED_BLOB_READ_WRITE_TOKEN,
     })
 
     // Return the blob information
