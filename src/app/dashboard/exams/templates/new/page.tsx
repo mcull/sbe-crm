@@ -14,7 +14,7 @@ import { ArrowLeft, Save, AlertCircle, Info } from "lucide-react"
 import Link from "next/link"
 import { CreateExamTemplateData, ExamType, BundledTiming } from "@/lib/types/exams"
 import { createExamTemplate } from "@/lib/actions/exams"
-import { getCourseOfferings } from "@/lib/actions/offerings"
+import { getOfferings } from "@/lib/actions/offerings"
 
 interface CourseOffering {
   id: string
@@ -59,7 +59,7 @@ export default function NewExamTemplatePage() {
   const loadCourseOfferings = async () => {
     try {
       setLoading(true)
-      const data = await getCourseOfferings()
+      const data = await getOfferings('wset_course')
       setCourseOfferings(data.filter((offering: CourseOffering) => offering.type === 'wset_course'))
     } catch (error) {
       console.error('Failed to load course offerings:', error)

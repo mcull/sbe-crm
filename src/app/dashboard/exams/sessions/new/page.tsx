@@ -16,7 +16,7 @@ import { format, addHours } from "date-fns"
 import { CreateExamSessionData, SessionType, ExamTemplate } from "@/lib/types/exams"
 import { createExamSession } from "@/lib/actions/exams"
 import { getExamTemplates } from "@/lib/actions/exams"
-import { getSessions } from "@/lib/actions/sessions"
+import { getSessions } from "@/lib/actions/offerings"
 
 interface CourseSession {
   id: string
