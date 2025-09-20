@@ -65,7 +65,6 @@ export function MarkdownEditor({
           preview="edit"
           height={height}
           data-color-mode="light"
-          visibleDragBar={false}
           textareaProps={{
             placeholder,
             style: {
