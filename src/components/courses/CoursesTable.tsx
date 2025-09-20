@@ -22,7 +22,6 @@ import {
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { MoreHorizontal, Edit, Archive, RotateCcw, DollarSign, Clock, Users, BookOpen } from 'lucide-react'
 import { archiveOffering, restoreOffering } from '@/lib/actions/offerings'
-import { MarkdownPreview } from '@/components/ui/markdown-editor'
 
 type Course = Database['public']['Tables']['offerings']['Row']
 
@@ -92,23 +91,13 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
           {courses.map((course) => (
             <TableRow key={course.id}>
               <TableCell>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{course.name}</span>
-                    {course.metadata?.archived && (
-                      <Badge variant="secondary" className="text-xs">Archived</Badge>
-                    )}
-                    {!course.active && !course.metadata?.archived && (
-                      <Badge variant="outline" className="text-xs">Inactive</Badge>
-                    )}
-                  </div>
-                  {course.description && (
-                    <div className="text-sm text-muted-foreground max-w-xs line-clamp-2">
-                      <MarkdownPreview
-                        value={course.description}
-                        className="text-muted-foreground [&>*]:text-muted-foreground [&>*]:text-xs [&>*]:leading-tight [&>*]:mb-1"
-                      />
-                    </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{course.name}</span>
+                  {course.metadata?.archived && (
+                    <Badge variant="secondary" className="text-xs">Archived</Badge>
+                  )}
+                  {!course.active && !course.metadata?.archived && (
+                    <Badge variant="outline" className="text-xs">Inactive</Badge>
                   )}
                 </div>
               </TableCell>
