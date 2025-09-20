@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -16,8 +16,12 @@ import { format, addHours } from "date-fns"
 import { ExamSession, UpdateExamSessionData, SessionType, ExamSessionStatus } from "@/lib/types/exams"
 import { getExamSession, updateExamSession } from "@/lib/actions/exams"
 
-export default function EditExamSessionPage() {
-  const params = useParams()
+interface EditExamSessionPageProps {
+  params: Promise<{ id: string }>
+}
+
+export default function EditExamSessionPage({ params }: EditExamSessionPageProps) {
+  const resolvedParams = use(params)
   const router = useRouter()
   const [session, setSession] = useState<ExamSession | null>(null)
   const [loading, setLoading] = useState(true)
@@ -27,10 +31,10 @@ export default function EditExamSessionPage() {
   const [formData, setFormData] = useState<UpdateExamSessionData>({})
 
   useEffect(() => {
-    if (params.id) {
-      loadSession(params.id as string)
+    if (resolvedParams.id) {
+      loadSession(resolvedParams.id)
     }
-  }, [params.id])
+  }, [resolvedParams.id])
 
   const loadSession = async (sessionId: string) => {
     try {

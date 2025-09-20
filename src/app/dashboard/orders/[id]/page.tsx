@@ -35,7 +35,7 @@ function formatDate(dateString: string) {
 }
 
 interface OrderPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 async function OrderDetailContent({ orderId }: { orderId: string }) {
@@ -334,7 +334,8 @@ async function OrderDetailContent({ orderId }: { orderId: string }) {
   )
 }
 
-export default function OrderPage({ params }: OrderPageProps) {
+export default async function OrderPage({ params }: OrderPageProps) {
+  const { id } = await params
   return (
     <Suspense fallback={
       <div className="space-y-6">
@@ -355,7 +356,7 @@ export default function OrderPage({ params }: OrderPageProps) {
         </div>
       </div>
     }>
-      <OrderDetailContent orderId={params.id} />
+      <OrderDetailContent orderId={id} />
     </Suspense>
   )
 }

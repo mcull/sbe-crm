@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,8 +14,12 @@ import Link from "next/link"
 import { ExamTemplate, UpdateExamTemplateData, ExamType, BundledTiming } from "@/lib/types/exams"
 import { getExamTemplate, updateExamTemplate } from "@/lib/actions/exams"
 
-export default function EditExamTemplatePage() {
-  const params = useParams()
+interface EditExamTemplatePageProps {
+  params: Promise<{ id: string }>
+}
+
+export default function EditExamTemplatePage({ params }: EditExamTemplatePageProps) {
+  const resolvedParams = use(params)
   const router = useRouter()
   const [template, setTemplate] = useState<ExamTemplate | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,10 +29,10 @@ export default function EditExamTemplatePage() {
   const [formData, setFormData] = useState<UpdateExamTemplateData>({})
 
   useEffect(() => {
-    if (params.id) {
-      loadTemplate(params.id as string)
+    if (resolvedParams.id) {
+      loadTemplate(resolvedParams.id)
     }
-  }, [params.id])
+  }, [resolvedParams.id])
 
   const loadTemplate = async (templateId: string) => {
     try {

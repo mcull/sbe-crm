@@ -8,13 +8,14 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     level: string
-  }
+  }>
 }
 
 export default async function EditCourseTemplatePage({ params }: PageProps) {
-  const wsetLevel = parseInt(params.level)
+  const { level } = await params
+  const wsetLevel = parseInt(level)
 
   if (isNaN(wsetLevel) || wsetLevel < 1 || wsetLevel > 4) {
     notFound()

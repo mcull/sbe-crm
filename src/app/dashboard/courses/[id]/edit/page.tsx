@@ -7,15 +7,16 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function EditCoursePage({ params }: PageProps) {
+  const { id } = await params
   let course
   try {
-    course = await getCourse(params.id)
+    course = await getCourse(id)
   } catch (error) {
     notFound()
   }

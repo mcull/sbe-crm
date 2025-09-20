@@ -8,9 +8,9 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 const getStatusColor = (status: string) => {
@@ -24,12 +24,13 @@ const getStatusColor = (status: string) => {
 }
 
 export default async function EditSessionPage({ params }: PageProps) {
+  const { id } = await params
   let session
   let courses
 
   try {
     [session, courses] = await Promise.all([
-      getCourseSession(params.id),
+      getCourseSession(id),
       getCourses()
     ])
   } catch (error) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useParams } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -12,18 +12,22 @@ import { format } from "date-fns"
 import { ExamTemplate, ExamSession } from "@/lib/types/exams"
 import { getExamTemplate, getExamSessions } from "@/lib/actions/exams"
 
-export default function ExamTemplateDetailPage() {
-  const params = useParams()
+interface ExamTemplateDetailPageProps {
+  params: Promise<{ id: string }>
+}
+
+export default function ExamTemplateDetailPage({ params }: ExamTemplateDetailPageProps) {
+  const resolvedParams = use(params)
   const [template, setTemplate] = useState<ExamTemplate | null>(null)
   const [sessions, setSessions] = useState<ExamSession[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (params.id) {
-      loadTemplateData(params.id as string)
+    if (resolvedParams.id) {
+      loadTemplateData(resolvedParams.id)
     }
-  }, [params.id])
+  }, [resolvedParams.id])
 
   const loadTemplateData = async (templateId: string) => {
     try {

@@ -22,7 +22,7 @@ import {
 import Link from 'next/link'
 
 interface SessionPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 function formatCurrency(amount: number) {
@@ -394,7 +394,8 @@ async function SessionDetailContent({ sessionId }: { sessionId: string }) {
   )
 }
 
-export default function SessionPage({ params }: SessionPageProps) {
+export default async function SessionPage({ params }: SessionPageProps) {
+  const { id } = await params
   return (
     <Suspense fallback={
       <div className="space-y-6">
@@ -415,7 +416,7 @@ export default function SessionPage({ params }: SessionPageProps) {
         </div>
       </div>
     }>
-      <SessionDetailContent sessionId={params.id} />
+      <SessionDetailContent sessionId={id} />
     </Suspense>
   )
 }
