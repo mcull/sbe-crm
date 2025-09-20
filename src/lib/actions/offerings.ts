@@ -519,7 +519,63 @@ export async function createExamRegistration(data: {
   return registration
 }
 
-// Delete offering
+// Archive offering (soft delete)
+export async function archiveOffering(id: string, reason?: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('offerings')
+    .update({
+      active: false,
+      updated_at: new Date().toISOString(),
+      metadata: {
+        archived: true,
+        archived_at: new Date().toISOString(),
+        archive_reason: reason || 'Archived by user'
+      }
+    })
+    .eq('id', id)
+
+  if (error) {
+    throw new Error(`Failed to archive offering: ${error.message}`)
+  }
+
+  revalidatePath('/dashboard/courses')
+  revalidatePath('/dashboard/offerings')
+}
+
+// Restore offering from archive
+export async function restoreOffering(id: string) {
+  const supabase = await createClient()
+
+  // Get current metadata
+  const { data: offering } = await supabase
+    .from('offerings')
+    .select('metadata')
+    .eq('id', id)
+    .single()
+
+  const currentMetadata = offering?.metadata || {}
+  const { archived, archived_at, archive_reason, ...cleanMetadata } = currentMetadata
+
+  const { error } = await supabase
+    .from('offerings')
+    .update({
+      active: true,
+      updated_at: new Date().toISOString(),
+      metadata: cleanMetadata
+    })
+    .eq('id', id)
+
+  if (error) {
+    throw new Error(`Failed to restore offering: ${error.message}`)
+  }
+
+  revalidatePath('/dashboard/courses')
+  revalidatePath('/dashboard/offerings')
+}
+
+// Delete offering (hard delete - only for admin use)
 export async function deleteOffering(id: string) {
   const supabase = await createClient()
 
@@ -534,4 +590,30 @@ export async function deleteOffering(id: string) {
 
   revalidatePath('/dashboard/courses')
   revalidatePath('/dashboard/offerings')
+}
+
+// Get archived offerings
+export async function getArchivedOfferings(type?: OfferingType) {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('offerings')
+    .select('*')
+    .eq('active', false)
+    .order('updated_at', { ascending: false })
+
+  if (type) {
+    query = query.eq('type', type)
+  }
+
+  const { data: offerings, error } = await query
+
+  if (error) {
+    throw new Error(`Failed to fetch archived offerings: ${error.message}`)
+  }
+
+  // Filter to only show truly archived items (not just inactive)
+  return (offerings || []).filter(offering =>
+    offering.metadata?.archived === true
+  )
 }

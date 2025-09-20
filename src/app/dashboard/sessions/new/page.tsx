@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Calendar, MapPin, Users, Clock, DollarSign, Zap } from 'lucide-react'
 import Link from 'next/link'
+import { MultiDatePicker, SessionDate } from '@/components/ui/multi-date-picker'
 
 type Offering = {
   id: string
@@ -53,8 +54,7 @@ export default function NewSessionPage() {
   const [formData, setFormData] = useState({
     offering_id: '',
     name: '',
-    session_date: '',
-    end_date: '',
+    session_dates: [] as SessionDate[],
     location: '',
     instructor: '',
     delivery_method: 'in_person' as 'in_person' | 'online' | 'hybrid',
@@ -94,19 +94,25 @@ export default function NewSessionPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedOffering) return
+    if (!selectedOffering || formData.session_dates.length === 0) return
 
     setCreating(true)
     try {
+      // Create session data with both new and legacy format for compatibility
       const sessionData = {
         ...formData,
         max_capacity: parseInt(formData.max_capacity),
-        early_bird_discount_percent: parseInt(formData.early_bird_discount_percent)
+        early_bird_discount_percent: parseInt(formData.early_bird_discount_percent),
+        // Add legacy fields for backward compatibility
+        session_date: formData.session_dates[0]?.date || '',
+        end_date: formData.session_dates[formData.session_dates.length - 1]?.end_time || formData.session_dates[formData.session_dates.length - 1]?.date || '',
+        // Include full session dates array
+        session_dates: formData.session_dates
       }
 
-      // Remove empty fields
+      // Remove empty fields except session_dates which should always be included
       Object.keys(sessionData).forEach(key => {
-        if (sessionData[key as keyof typeof sessionData] === '') {
+        if (key !== 'session_dates' && sessionData[key as keyof typeof sessionData] === '') {
           delete sessionData[key as keyof typeof sessionData]
         }
       })
@@ -228,30 +234,14 @@ export default function NewSessionPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="session_date">Start Date & Time *</Label>
-                    <Input
-                      id="session_date"
-                      type="datetime-local"
-                      required
-                      value={formData.session_date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, session_date: e.target.value }))}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="end_date">End Date & Time</Label>
-                    <Input
-                      id="end_date"
-                      type="datetime-local"
-                      value={formData.end_date}
-                      onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
-                    />
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Leave blank for single-day sessions
-                    </p>
-                  </div>
-                </div>
+                <MultiDatePicker
+                  value={formData.session_dates}
+                  onChange={(dates) => setFormData(prev => ({ ...prev, session_dates: dates }))}
+                  label="Session Dates *"
+                  required
+                  defaultLocation={formData.location}
+                  defaultInstructor={formData.instructor}
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -377,10 +367,17 @@ export default function NewSessionPage() {
                   <Label className="text-sm font-medium text-muted-foreground">Product Name</Label>
                   <p className="font-medium">
                     {formData.name ||
-                     `${selectedOffering.name}${formData.session_date ?
-                       ` - ${new Date(formData.session_date).toLocaleDateString('en-US', {
+                     `${selectedOffering.name}${formData.session_dates.length > 0 ?
+                       formData.session_dates.length === 1 ?
+                       ` - ${new Date(formData.session_dates[0].date).toLocaleDateString('en-US', {
                          month: 'short', day: 'numeric', year: 'numeric'
-                       })}` : ''
+                       })}` :
+                       ` - ${formData.session_dates.length} Sessions (${new Date(formData.session_dates[0].date).toLocaleDateString('en-US', {
+                         month: 'short', day: 'numeric'
+                       })} - ${new Date(formData.session_dates[formData.session_dates.length - 1].date).toLocaleDateString('en-US', {
+                         month: 'short', day: 'numeric', year: 'numeric'
+                       })})`
+                       : ''
                      }${formData.location ? ` (${formData.location})` : ''}`
                     }
                   </p>
@@ -419,7 +416,7 @@ export default function NewSessionPage() {
           )}
 
           <div className="flex gap-3">
-            <Button type="submit" disabled={!selectedOffering || creating} className="flex-1">
+            <Button type="submit" disabled={!selectedOffering || creating || formData.session_dates.length === 0} className="flex-1">
               {creating ? 'Creating Session...' : 'Create Session'}
             </Button>
           </div>

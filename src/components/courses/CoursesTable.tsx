@@ -20,8 +20,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
-import { MoreHorizontal, Edit, Trash2, DollarSign, Clock, Users, BookOpen } from 'lucide-react'
-import { deleteOffering } from '@/lib/actions/offerings'
+import { MoreHorizontal, Edit, Archive, RotateCcw, DollarSign, Clock, Users, BookOpen } from 'lucide-react'
+import { archiveOffering, restoreOffering } from '@/lib/actions/offerings'
+import { MarkdownPreview } from '@/components/ui/markdown-editor'
 
 type Course = Database['public']['Tables']['offerings']['Row']
 
@@ -40,19 +41,25 @@ const getWSETLevelColor = (level: number) => {
 }
 
 export default function CoursesTable({ courses }: CoursesTableProps) {
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [courseToDelete, setCourseToDelete] = useState<Course | null>(null)
+  const [archiveDialogOpen, setArchiveDialogOpen] = useState(false)
+  const [courseToArchive, setCourseToArchive] = useState<Course | null>(null)
+  const [isArchived, setIsArchived] = useState(false)
 
-  const handleDeleteClick = (course: Course) => {
-    setCourseToDelete(course)
-    setDeleteDialogOpen(true)
+  const handleArchiveClick = (course: Course) => {
+    setCourseToArchive(course)
+    setIsArchived(course.metadata?.archived === true)
+    setArchiveDialogOpen(true)
   }
 
-  const handleConfirmDelete = async () => {
-    if (courseToDelete) {
-      await deleteOffering(courseToDelete.id)
-      setDeleteDialogOpen(false)
-      setCourseToDelete(null)
+  const handleConfirmArchiveAction = async () => {
+    if (courseToArchive) {
+      if (isArchived) {
+        await restoreOffering(courseToArchive.id)
+      } else {
+        await archiveOffering(courseToArchive.id, 'Archived from courses management')
+      }
+      setArchiveDialogOpen(false)
+      setCourseToArchive(null)
     }
   }
 
@@ -86,10 +93,21 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
             <TableRow key={course.id}>
               <TableCell>
                 <div className="space-y-1">
-                  <div className="font-medium">{course.name}</div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">{course.name}</span>
+                    {course.metadata?.archived && (
+                      <Badge variant="secondary" className="text-xs">Archived</Badge>
+                    )}
+                    {!course.active && !course.metadata?.archived && (
+                      <Badge variant="outline" className="text-xs">Inactive</Badge>
+                    )}
+                  </div>
                   {course.description && (
-                    <div className="text-sm text-muted-foreground truncate max-w-xs">
-                      {course.description}
+                    <div className="text-sm text-muted-foreground max-w-xs line-clamp-2">
+                      <MarkdownPreview
+                        value={course.description}
+                        className="text-muted-foreground [&>*]:text-muted-foreground [&>*]:text-xs [&>*]:leading-tight [&>*]:mb-1"
+                      />
                     </div>
                   )}
                 </div>
@@ -136,11 +154,20 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      className="text-destructive"
-                      onClick={() => handleDeleteClick(course)}
+                      onClick={() => handleArchiveClick(course)}
+                      className={course.metadata?.archived ? "text-blue-600" : "text-amber-600"}
                     >
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Delete Course
+                      {course.metadata?.archived ? (
+                        <>
+                          <RotateCcw className="mr-2 h-4 w-4" />
+                          Restore Course
+                        </>
+                      ) : (
+                        <>
+                          <Archive className="mr-2 h-4 w-4" />
+                          Archive Course
+                        </>
+                      )}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -150,22 +177,36 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
         </TableBody>
       </Table>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={archiveDialogOpen} onOpenChange={setArchiveDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Course</AlertDialogTitle>
+            <AlertDialogTitle>
+              {isArchived ? 'Restore Course' : 'Archive Course'}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete{' '}
-              <strong>{courseToDelete?.name}</strong>? This will also delete all associated course sessions. This action cannot be undone.
+              {isArchived ? (
+                <>
+                  Are you sure you want to restore{' '}
+                  <strong>{courseToArchive?.name}</strong>? This will make the course active and available for new sessions.
+                </>
+              ) : (
+                <>
+                  Are you sure you want to archive{' '}
+                  <strong>{courseToArchive?.name}</strong>? This will deactivate the course and hide it from the main course list, but you can restore it later if needed.
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              onClick={handleConfirmDelete}
+              className={isArchived
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-amber-600 text-white hover:bg-amber-700"
+              }
+              onClick={handleConfirmArchiveAction}
             >
-              Delete Course
+              {isArchived ? 'Restore Course' : 'Archive Course'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

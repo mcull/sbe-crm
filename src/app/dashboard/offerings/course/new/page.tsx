@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
@@ -225,17 +225,27 @@ export default function NewCoursePage() {
                 </p>
               </div>
 
-              <div>
-                <Label htmlFor="description">Course Description *</Label>
-                <Textarea
-                  id="description"
-                  required
-                  rows={4}
-                  placeholder={`Describe the ${formData.qualification_category} course content, learning objectives, and what students will achieve...`}
-                  value={formData.description}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                />
-              </div>
+              <MarkdownEditor
+                label="Course Description *"
+                required
+                placeholder={`Describe the ${formData.qualification_category} course content, learning objectives, and what students will achieve...
+
+**Example:**
+## Course Overview
+Learn the fundamentals of ${formData.qualification_category} appreciation and tasting technique.
+
+## What You'll Learn
+- Basic principles and terminology
+- Tasting methodology and note-taking
+- Key regions and styles
+- Food and ${formData.qualification_category} pairing basics
+
+[More information](https://example.com)
+`}
+                value={formData.description}
+                onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+                height={200}
+              />
 
               <div>
                 <Label htmlFor="course_format">Course Format</Label>
