@@ -65,13 +65,6 @@ export function MarkdownEditor({
           preview="edit"
           height={height}
           data-color-mode="light"
-          textareaProps={{
-            placeholder,
-            style: {
-              fontSize: 14,
-              lineHeight: 1.5,
-            },
-          }}
         />
       </div>
       {error && (
