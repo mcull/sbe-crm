@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { Switch } from '@/components/ui/switch'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { ArrowLeft, BookOpen, DollarSign, Save, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -36,6 +37,11 @@ export default function EditOfferingPage({ params }: PageProps) {
     default_capacity: 20,
     active: true,
     auto_create_products: true,
+    image_url: '',
+    image_alt: '',
+    image_blob_token: '',
+    image_file_size: 0,
+    image_content_type: '',
     metadata: {}
   })
 
@@ -56,6 +62,11 @@ export default function EditOfferingPage({ params }: PageProps) {
         default_capacity: offering.default_capacity || 20,
         active: offering.active,
         auto_create_products: offering.auto_create_products,
+        image_url: offering.image_url || '',
+        image_alt: offering.image_alt || '',
+        image_blob_token: offering.image_blob_token || '',
+        image_file_size: offering.image_file_size || 0,
+        image_content_type: offering.image_content_type || '',
         metadata: offering.metadata || {}
       })
     } catch (err) {
@@ -134,6 +145,43 @@ export default function EditOfferingPage({ params }: PageProps) {
                   required
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                />
+              </div>
+
+              <ImageUpload
+                value={formData.image_url}
+                onChange={(url) => setFormData(prev => ({ ...prev, image_url: url || '' }))}
+                onMetadataChange={(metadata) => {
+                  if (metadata) {
+                    setFormData(prev => ({
+                      ...prev,
+                      image_blob_token: metadata.pathname,
+                      image_file_size: metadata.size,
+                      image_content_type: metadata.contentType
+                    }))
+                  } else {
+                    setFormData(prev => ({
+                      ...prev,
+                      image_blob_token: '',
+                      image_file_size: 0,
+                      image_content_type: ''
+                    }))
+                  }
+                }}
+                label="Course Image"
+                placeholder="Upload a course image..."
+                entityType="offering"
+                entityId={params.id}
+                className="mb-4"
+              />
+
+              <div>
+                <Label htmlFor="image_alt">Image Alt Text</Label>
+                <Input
+                  id="image_alt"
+                  placeholder="Describe the image for accessibility"
+                  value={formData.image_alt}
+                  onChange={(e) => setFormData(prev => ({ ...prev, image_alt: e.target.value }))}
                 />
               </div>
 

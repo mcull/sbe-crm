@@ -48,6 +48,11 @@ export async function getOffering(id: string) {
 
 export async function createOffering(data: {
   name: string
+  image_url?: string
+  image_alt?: string
+  image_blob_token?: string
+  image_file_size?: number
+  image_content_type?: string
   description?: string
   type: OfferingType
   wset_level?: number

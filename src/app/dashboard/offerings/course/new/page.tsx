@@ -12,6 +12,8 @@ import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Switch } from '@/components/ui/switch'
+import { Textarea } from '@/components/ui/textarea'
+import { ImageUpload } from '@/components/ui/image-upload'
 import { ArrowLeft, BookOpen, DollarSign, Users, Clock, Settings, Zap } from 'lucide-react'
 import Link from 'next/link'
 
@@ -81,6 +83,13 @@ export default function NewCoursePage() {
     auto_create_products: true,
     active: true,
 
+    // Image fields
+    image_url: '',
+    image_alt: '',
+    image_blob_token: '',
+    image_file_size: 0,
+    image_content_type: '',
+
     // Metadata fields
     course_format: 'online' as 'online' | 'in_person' | 'hybrid',
     certification_body: 'WSET',
@@ -112,6 +121,11 @@ export default function NewCoursePage() {
         default_capacity: parseInt(formData.default_capacity),
         active: formData.active,
         auto_create_products: formData.auto_create_products,
+        image_url: formData.image_url || undefined,
+        image_alt: formData.image_alt || undefined,
+        image_blob_token: formData.image_blob_token || undefined,
+        image_file_size: formData.image_file_size || undefined,
+        image_content_type: formData.image_content_type || undefined,
         metadata: {
           qualification_category: formData.qualification_category,
           course_format: formData.course_format,
@@ -222,6 +236,45 @@ export default function NewCoursePage() {
                 />
                 <p className="text-xs text-muted-foreground mt-1">
                   Leave blank to use: "{generateDefaultCourseName(formData.qualification_category, parseInt(formData.wset_level), formData.course_format)}"
+                </p>
+              </div>
+
+              <ImageUpload
+                value={formData.image_url}
+                onChange={(url) => setFormData(prev => ({ ...prev, image_url: url || '' }))}
+                onMetadataChange={(metadata) => {
+                  if (metadata) {
+                    setFormData(prev => ({
+                      ...prev,
+                      image_blob_token: metadata.pathname,
+                      image_file_size: metadata.size,
+                      image_content_type: metadata.contentType
+                    }))
+                  } else {
+                    setFormData(prev => ({
+                      ...prev,
+                      image_blob_token: '',
+                      image_file_size: 0,
+                      image_content_type: ''
+                    }))
+                  }
+                }}
+                label="Course Image"
+                placeholder="Upload a course image..."
+                entityType="offering"
+                className="mb-4"
+              />
+
+              <div>
+                <Label htmlFor="image_alt">Image Alt Text</Label>
+                <Input
+                  id="image_alt"
+                  placeholder="Describe the image for accessibility (e.g., 'WSET Level 1 Wines course materials and wine glasses')"
+                  value={formData.image_alt}
+                  onChange={(e) => setFormData(prev => ({ ...prev, image_alt: e.target.value }))}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Alt text helps screen readers and improves SEO
                 </p>
               </div>
 

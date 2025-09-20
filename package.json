@@ -27,6 +27,7 @@
     "@uiw/react-markdown-editor": "^6.1.4",
     "@uiw/react-markdown-preview": "^5.1.5",
     "@vercel/analytics": "^1.5.0",
+    "@vercel/blob": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "csv-parse": "^6.1.0",
