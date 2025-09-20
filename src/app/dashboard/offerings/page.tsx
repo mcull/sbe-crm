@@ -523,7 +523,7 @@ export default function OfferingsPage() {
         <OfferingsStats />
       </Suspense>
 
-      <Tabs defaultValue="courses" className="space-y-4">
+      <Tabs defaultValue="courses" className="space-y-4" id="offerings-tabs">
         <TabsList>
           <TabsTrigger value="courses">
             <GraduationCap className="mr-2 h-4 w-4" />

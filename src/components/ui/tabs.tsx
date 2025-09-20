@@ -5,14 +5,20 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
 
+interface TabsProps extends React.ComponentProps<typeof TabsPrimitive.Root> {
+  id?: string
+}
+
 function Tabs({
   className,
+  id,
   ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
+}: TabsProps) {
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
       className={cn("flex flex-col gap-2", className)}
+      id={id}
       {...props}
     />
   )
