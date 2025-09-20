@@ -518,3 +518,20 @@ export async function createExamRegistration(data: {
 
   return registration
 }
+
+// Delete offering
+export async function deleteOffering(id: string) {
+  const supabase = await createClient()
+
+  const { error } = await supabase
+    .from('offerings')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    throw new Error(`Failed to delete offering: ${error.message}`)
+  }
+
+  revalidatePath('/dashboard/courses')
+  revalidatePath('/dashboard/offerings')
+}

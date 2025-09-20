@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { getCourses, getCourseSessions } from '@/lib/actions/courses'
+import { getOfferings, getSessions } from '@/lib/actions/offerings'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -10,8 +10,8 @@ import SessionsTable from '@/components/courses/SessionsTable'
 
 export default async function CoursesPage() {
   const [courses, sessions] = await Promise.all([
-    getCourses(),
-    getCourseSessions(),
+    getOfferings('wset_course'),
+    getSessions(),
   ])
 
   return (
@@ -41,7 +41,7 @@ export default async function CoursesPage() {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold">WSET Courses</h2>
             <Button asChild>
-              <Link href="/dashboard/courses/new">
+              <Link href="/dashboard/offerings/course/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Course
               </Link>

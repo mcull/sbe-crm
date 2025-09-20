@@ -21,9 +21,9 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog'
 import { MoreHorizontal, Edit, Trash2, DollarSign, Clock, Users, BookOpen } from 'lucide-react'
-import { deleteCourse } from '@/lib/actions/courses'
+import { deleteOffering } from '@/lib/actions/offerings'
 
-type Course = Database['public']['Tables']['courses']['Row']
+type Course = Database['public']['Tables']['offerings']['Row']
 
 interface CoursesTableProps {
   courses: Course[]
@@ -50,7 +50,7 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
 
   const handleConfirmDelete = async () => {
     if (courseToDelete) {
-      await deleteCourse(courseToDelete.id)
+      await deleteOffering(courseToDelete.id)
       setDeleteDialogOpen(false)
       setCourseToDelete(null)
     }
@@ -62,7 +62,7 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
         <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
         <p className="text-muted-foreground mb-4">No course templates found.</p>
         <Button asChild>
-          <Link href="/dashboard/courses/new">Create your first course template</Link>
+          <Link href="/dashboard/offerings/course/new">Create your first course template</Link>
         </Button>
       </div>
     )
@@ -95,21 +95,21 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
                 </div>
               </TableCell>
               <TableCell>
-                <Badge className={getWSETLevelColor(course.wset_level)}>
-                  Level {course.wset_level}
+                <Badge className={getWSETLevelColor(course.wset_level || 0)}>
+                  Level {course.wset_level || 'N/A'}
                 </Badge>
               </TableCell>
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  <span>{course.duration_weeks} week{course.duration_weeks !== 1 ? 's' : ''}</span>
+                  <span>{course.default_duration_hours || 0} hours</span>
                 </div>
               </TableCell>
               <TableCell>
-                {course.price ? (
+                {course.base_price ? (
                   <div className="flex items-center space-x-2">
                     <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    <span>${course.price}</span>
+                    <span>${course.base_price}</span>
                   </div>
                 ) : (
                   <span className="text-muted-foreground">Not set</span>
@@ -118,7 +118,7 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
               <TableCell>
                 <div className="flex items-center space-x-2">
                   <Users className="h-4 w-4 text-muted-foreground" />
-                  <span>{course.max_capacity} max</span>
+                  <span>{course.default_capacity || 0} max</span>
                 </div>
               </TableCell>
               <TableCell className="text-right">
@@ -130,7 +130,7 @@ export default function CoursesTable({ courses }: CoursesTableProps) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/dashboard/courses/${course.id}/edit`}>
+                      <Link href={`/dashboard/offerings/${course.id}/edit`}>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit Course
                       </Link>
