@@ -168,6 +168,9 @@ export default function EditOfferingPage({ params }: PageProps) {
                     }))
                   }
                 }}
+                onAltTextSuggestion={(altText) => {
+                  setFormData(prev => ({ ...prev, image_alt: altText }))
+                }}
                 label="Course Image"
                 placeholder="Upload a course image..."
                 entityType="offering"
@@ -175,15 +178,20 @@ export default function EditOfferingPage({ params }: PageProps) {
                 className="mb-4"
               />
 
-              <div>
-                <Label htmlFor="image_alt">Image Alt Text</Label>
-                <Input
-                  id="image_alt"
-                  placeholder="Describe the image for accessibility"
-                  value={formData.image_alt}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_alt: e.target.value }))}
-                />
-              </div>
+              {formData.image_url && (
+                <div>
+                  <Label htmlFor="image_alt">Image Alt Text</Label>
+                  <Input
+                    id="image_alt"
+                    placeholder="Alt text will be generated automatically for new images..."
+                    value={formData.image_alt}
+                    onChange={(e) => setFormData(prev => ({ ...prev, image_alt: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    For new images, alt text is automatically generated using AI. You can edit it if needed.
+                  </p>
+                </div>
+              )}
 
               <MarkdownEditor
                 label="Course Description *"

@@ -13,6 +13,7 @@ interface ImageUploadProps {
   value?: string // Current image URL
   onChange: (url: string | null) => void
   onMetadataChange?: (metadata: ImageMetadata | null) => void
+  onAltTextSuggestion?: (altText: string) => void
   label?: string
   required?: boolean
   className?: string
@@ -29,12 +30,14 @@ interface ImageMetadata {
   contentType: string
   uploadedAt: string
   pathname: string
+  suggestedAltText?: string
 }
 
 export function ImageUpload({
   value,
   onChange,
   onMetadataChange,
+  onAltTextSuggestion,
   label = "Image",
   required = false,
   className = "",
@@ -95,6 +98,11 @@ export function ImageUpload({
       setPreview(metadata.url)
       onChange(metadata.url)
       onMetadataChange?.(metadata)
+
+      // Call alt text suggestion callback if available
+      if (metadata.suggestedAltText && onAltTextSuggestion) {
+        onAltTextSuggestion(metadata.suggestedAltText)
+      }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Upload failed'
@@ -194,7 +202,7 @@ export function ImageUpload({
               {uploading ? (
                 <>
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <p className="text-sm text-gray-600">Uploading image...</p>
+                  <p className="text-sm text-gray-600">Uploading image and generating alt text...</p>
                 </>
               ) : (
                 <>

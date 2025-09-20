@@ -259,24 +259,29 @@ export default function NewCoursePage() {
                     }))
                   }
                 }}
+                onAltTextSuggestion={(altText) => {
+                  setFormData(prev => ({ ...prev, image_alt: altText }))
+                }}
                 label="Course Image"
                 placeholder="Upload a course image..."
                 entityType="offering"
                 className="mb-4"
               />
 
-              <div>
-                <Label htmlFor="image_alt">Image Alt Text</Label>
-                <Input
-                  id="image_alt"
-                  placeholder="Describe the image for accessibility (e.g., 'WSET Level 1 Wines course materials and wine glasses')"
-                  value={formData.image_alt}
-                  onChange={(e) => setFormData(prev => ({ ...prev, image_alt: e.target.value }))}
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Alt text helps screen readers and improves SEO
-                </p>
-              </div>
+              {formData.image_url && (
+                <div>
+                  <Label htmlFor="image_alt">AI-Generated Alt Text</Label>
+                  <Input
+                    id="image_alt"
+                    placeholder="Alt text will be generated automatically..."
+                    value={formData.image_alt}
+                    onChange={(e) => setFormData(prev => ({ ...prev, image_alt: e.target.value }))}
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Alt text was automatically generated using AI. You can edit it if needed.
+                  </p>
+                </div>
+              )}
 
               <MarkdownEditor
                 label="Course Description *"

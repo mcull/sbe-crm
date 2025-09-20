@@ -1,6 +1,46 @@
 import { put } from '@vercel/blob'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import OpenAI from 'openai'
+
+async function generateAltText(imageUrl: string): Promise<string> {
+  try {
+    if (!process.env.OPENAI_API_KEY) {
+      return 'Course offering image'
+    }
+
+    const openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    })
+
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "Generate a concise, descriptive alt text for this image. The image is for a wine/spirits education course offering. Focus on describing the visual elements that would be most helpful for accessibility and SEO. Keep it under 125 characters and make it specific to what's actually shown in the image."
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageUrl,
+              },
+            },
+          ],
+        },
+      ],
+      max_tokens: 50,
+    })
+
+    return response.choices[0]?.message?.content?.trim() || 'Course offering image'
+  } catch (error) {
+    console.error('Failed to generate alt text:', error)
+    return 'Course offering image'
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -67,12 +107,16 @@ export async function POST(request: NextRequest) {
       token: process.env.SEBEVED_BLOB_READ_WRITE_TOKEN,
     })
 
-    // Return the blob information
+    // Generate alt text using OpenAI vision
+    const suggestedAltText = await generateAltText(blob.url)
+
+    // Return the blob information with suggested alt text
     return NextResponse.json({
       url: blob.url,
       pathname: blob.pathname,
       contentType,
       size: body.size,
+      suggestedAltText,
       uploadedAt: new Date().toISOString(),
     })
 
