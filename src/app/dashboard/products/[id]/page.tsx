@@ -36,7 +36,7 @@ function formatDate(dateString: string) {
 }
 
 interface ProductPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 async function ProductDetailContent({ productId }: { productId: string }) {
@@ -367,7 +367,8 @@ async function ProductDetailContent({ productId }: { productId: string }) {
   )
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params }: ProductPageProps) {
+  const { id } = await params
   return (
     <Suspense fallback={
       <div className="space-y-6">
@@ -388,7 +389,7 @@ export default function ProductPage({ params }: ProductPageProps) {
         </div>
       </div>
     }>
-      <ProductDetailContent productId={params.id} />
+      <ProductDetailContent productId={id} />
     </Suspense>
   )
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, use } from 'react'
 import { useRouter } from 'next/navigation'
 import { getOffering, updateOffering } from '@/lib/actions/offerings'
 import { Button } from '@/components/ui/button'
@@ -16,12 +16,13 @@ import Link from 'next/link'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface PageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default function EditOfferingPage({ params }: PageProps) {
+  const resolvedParams = use(params)
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -47,11 +48,11 @@ export default function EditOfferingPage({ params }: PageProps) {
 
   useEffect(() => {
     loadOffering()
-  }, [params.id])
+  }, [resolvedParams.id])
 
   const loadOffering = async () => {
     try {
-      const offering = await getOffering(params.id)
+      const offering = await getOffering(resolvedParams.id)
       setFormData({
         name: offering.name || '',
         description: offering.description || '',
@@ -83,7 +84,7 @@ export default function EditOfferingPage({ params }: PageProps) {
     setError('')
 
     try {
-      await updateOffering(params.id, formData)
+      await updateOffering(resolvedParams.id, formData)
       router.push('/dashboard/courses')
     } catch (err) {
       setError('Failed to update offering. Please try again.')
@@ -174,7 +175,7 @@ export default function EditOfferingPage({ params }: PageProps) {
                 label="Course Image"
                 placeholder="Upload a course image..."
                 entityType="offering"
-                entityId={params.id}
+                entityId={resolvedParams.id}
                 className="mb-4"
               />
 
